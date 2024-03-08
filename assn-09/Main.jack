@@ -1,0 +1,133 @@
+class Main{
+    static int x, y, direction, totalSteps;
+    static Array powerOfTwos;
+    function void main(){
+        do Main.setup();
+        do Main.game();
+        return;
+    }
+
+    function void setup(){
+        do Main.getUserInput();
+        let totalSteps = 0;
+        let powerOfTwos = Array.new(16);
+        do Main.setupArray();
+        do Screen.clearScreen();
+        return;
+    }
+
+    function void setupArray(){
+        var int i, powerOfTwo;
+        let i = 0;
+        let powerOfTwo = 1;
+        while(i < 16){
+            let powerOfTwos[i] = powerOfTwo;
+            let powerOfTwo = powerOfTwo * 2;
+            let i = i + 1;
+        }
+        return;
+    }
+
+    function void game(){
+        var int address, value, remainder, white;
+        let white = 0;
+        while(~(Keyboard.keyPressed() = 82)){
+            if(Keyboard.keyPressed() = 32){ //keyPressed == space
+                do Sys.wait(500);
+            }
+            if(Keyboard.keyPressed() = 82){ //keyPressed = R
+                
+            }
+            
+            //game logic
+            let totalSteps = totalSteps + 1;
+            
+            //get color
+            let address = (32 * y) + (x / 16);
+            let remainder = Main.getRemainder(x, 16);//x - (x / 16 * 16);
+            let value = Memory.peek(16384 + address) & powerOfTwos[remainder];//color
+
+            if(value = 0){
+                do Screen.setColor(true);
+                do Main.changeDirectionAfterWhite();
+            }else{
+                do Screen.setColor(false);
+                do Main.changeDirectionAfterBlack();
+            }
+            do Screen.drawPixel(x, y);
+
+            if(direction = 0){
+                let y = Main.changeCoordinate(y, -1, 256);
+            }
+
+            if(direction = 1){
+                let x = Main.changeCoordinate(x, 1, 512);
+            }
+
+            if(direction = 2){
+                let y = Main.changeCoordinate(y, 1, 256);
+            }
+
+            if(direction = 3){
+                let x = Main.changeCoordinate(x, -1, 512);
+            }
+        }
+
+        do Output.printString("Total number of steps: ");
+        do Output.printInt(totalSteps);
+        do Output.println();
+        do Sys.wait(250);
+        do Main.setup();
+        do Main.game();
+        return;
+    }
+
+    function void getUserInput(){
+        let x = Keyboard.readInt("Enter x: ");
+        while((x < 0) | (x > 511)){
+            let x = Keyboard.readInt("x must be nonnegative and less than 512: ");
+        }
+
+        let y = Keyboard.readInt("Enter y: ");
+        while((y < 0) | (y > 255)){
+           let y = Keyboard.readInt("y must be nonnegative and less than 256: ");
+        }
+
+        let direction = Keyboard.readInt("Enter your initial direction (0 = north, 1 = east, 2 = south and 3 = west): ");
+        while((direction < 0) | (direction > 3)){
+            let direction = Keyboard.readInt("Enter your initial direction (0 = north, 1 = east, 2 = south and 3 = west): ");
+        }
+        return;
+    }
+
+    function void changeDirectionAfterWhite(){
+        if(direction = 3){
+            let direction = 0;
+        }else{
+            let direction = direction + 1;
+        }
+        return;
+    }
+
+    function void changeDirectionAfterBlack(){
+        if(direction = 0){
+            let direction = 3;
+        }else{
+            let direction = direction - 1;
+        }
+        return;
+    }
+
+    function int getRemainder(int value, int denominator){
+        return value - (value / denominator * denominator);
+    }
+
+    function int changeCoordinate(int coor, int value, int denominator){
+        let coor = coor + value;
+        let coor = Main.getRemainder(coor, denominator);
+        if(coor < 0){
+            let coor = coor + denominator;
+        }
+        return coor;
+    }
+}
